@@ -10,7 +10,8 @@
               <v-icon>mdi-home</v-icon>
             </v-list-item-icon>
             <v-list-item-title>Home</v-list-item-title>
-          </v-list-item>          <v-list-item link :to="{ name: 'Messages' }">
+          </v-list-item>
+          <v-list-item link :to="{ name: 'Messages' }">
             <v-list-item-icon>
               <v-icon>mdi-monitor-dashboard</v-icon>
             </v-list-item-icon>
@@ -79,17 +80,28 @@
 
         <v-list dense>
           <v-list-item-group color="primary">
-            <v-list-item
-              v-for="(item, i) in user_menu"
-              :key="i"
-              :to="item.path"
-            >
+            <v-list-item @click="logout">
               <v-list-item-icon>
-                <v-icon v-text="item.icon"></v-icon>
+                <v-icon>mdi-account-circle</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
-                <v-list-item-title v-text="item.text"></v-list-item-title>
+                <v-list-item-title>Logout</v-list-item-title>
               </v-list-item-content>
+            </v-list-item>
+            <v-list-item>
+              <g-signin-button
+                v-if="isEmpty(user)"
+                :params="googleSignInParams"
+                @success="onGoogleSignInSuccess"
+                @error="onGoogleSignInError"
+              >
+                <v-list-item-icon>
+                  <v-icon>mdi-login-variant</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title>Login</v-list-item-title>
+                </v-list-item-content>
+              </g-signin-button>
             </v-list-item>
           </v-list-item-group>
         </v-list>
@@ -99,22 +111,35 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import auth from "../api/auth.js";
 export default {
   data: () => ({
     user: {},
     drawer: true,
     group: null,
-
-    user_menu: [],
+    googleSignInParams: {
+      client_id:
+        "492568801544-oeebduag9v5j7pv1rdj1jejpq2q38u7j.apps.googleusercontent.com",
+    },
   }),
-  methods: { ...mapActions(["authenticate"]) },
-  computed: {},
-  mounted() {
-    this.user_menu = [
-      { text: "User", icon: "mdi-account-circle" },
-      { text: "Login", icon: "mdi-login-variant"},
-    ];
+  methods: {
+    isEmpty(obj) {
+      return Object.keys(obj).length === 0;
+    },
+    async onGoogleSignInSuccess(resp) {
+      const token = resp.Zb.access_token;
+      await auth.authenticate(token);
+      this.$router.go(this.$router.currentroute);
+    },
+    onGoogleSignInError(error) {
+      console.log("OH NOES", error);
+    },
+    async logout() {
+      await auth.logout();
+      this.$router.go(this.$router.currentroute);
+    },
   },
+  computed: {},
+  mounted() {},
 };
 </script>

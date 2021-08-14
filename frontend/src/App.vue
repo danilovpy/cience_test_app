@@ -1,18 +1,18 @@
 <template>
   <v-app>
-    <NavBar/>
-   
+    <NavBar />
+
     <v-main>
-      <router-view />
+      <router-view :key="$route.path"></router-view>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import NavBar from "./components/NavBar.vue"
+import NavBar from "./components/NavBar.vue";
 export default {
   name: "App",
-  components: {NavBar},
+  components: { NavBar },
 
   data: () => ({
     //
